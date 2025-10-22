@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using WarehouseManagementApi.Models;
+
 namespace WarehouseManagementApi
 {
     public class Program
@@ -12,6 +15,8 @@ namespace WarehouseManagementApi
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Services.AddDbContext<ProductContext>(options =>
+                options.UseInMemoryDatabase("ProductsDb"));
 
             var app = builder.Build();
 
