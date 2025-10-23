@@ -17,8 +17,6 @@ namespace WarehouseManagementApi
             builder.Services.AddOpenApi();
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseInMemoryDatabase("WarehouseDb"));
-            builder.Services.AddDbContext<UserContext>(options =>
-                options.UseInMemoryDatabase("UsersDb"));
 
             var app = builder.Build();
 

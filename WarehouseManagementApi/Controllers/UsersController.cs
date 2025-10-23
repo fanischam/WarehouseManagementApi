@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WarehouseManagementApi.Data;
 using WarehouseManagementApi.Models.User;
@@ -10,6 +11,7 @@ namespace WarehouseManagementApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly PasswordHasher<User> _passwordHasher = new();
         public UsersController(AppDbContext context)
         {
             _context = context;
@@ -42,7 +44,7 @@ namespace WarehouseManagementApi.Controllers
                 Id = Guid.NewGuid(),
                 Username = userDTO.Username,
                 Email = userDTO.Email,
-                PasswordHash = userDTO.Password
+                PasswordHash = _passwordHasher.HashPassword(new User(), userDTO.Password)
             };
 
             _context.Add(user);
@@ -64,7 +66,7 @@ namespace WarehouseManagementApi.Controllers
             user.Email = updatedUser.Email;
             if (!string.IsNullOrEmpty(updatedUser.Password))
             {
-                user.PasswordHash = updatedUser.Password; // Hash here if needed
+                user.PasswordHash = _passwordHasher.HashPassword(user, updatedUser.Password);
             }
 
             try
