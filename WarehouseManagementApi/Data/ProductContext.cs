@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WarehouseManagementApi.Models;
 
-namespace WarehouseManagementApi.Models
+namespace WarehouseManagementApi.Data
 {
     public class ProductContext: DbContext
     {

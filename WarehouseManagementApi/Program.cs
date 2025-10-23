@@ -1,6 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
-using WarehouseManagementApi.Models;
+using WarehouseManagementApi.Data;
 
 namespace WarehouseManagementApi
 {
