@@ -15,8 +15,10 @@ namespace WarehouseManagementApi
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
-            builder.Services.AddDbContext<ProductContext>(options =>
-                options.UseInMemoryDatabase("ProductsDb"));
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseInMemoryDatabase("WarehouseDb"));
+            builder.Services.AddDbContext<UserContext>(options =>
+                options.UseInMemoryDatabase("UsersDb"));
 
             var app = builder.Build();
 

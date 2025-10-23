@@ -9,16 +9,16 @@ namespace WarehouseManagementApi.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly ProductContext _productContext;
-        public ProductsController(ProductContext productContext)
+        private readonly AppDbContext _context;
+        public ProductsController(AppDbContext productContext)
         {
-            _productContext = productContext;
+            _context = productContext;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> Get()
         {
-            return await _productContext.Products
+            return await _context.Products
                 .Select(product => ProductToDTO(product))
                 .ToListAsync();
         }
@@ -26,7 +26,7 @@ namespace WarehouseManagementApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDTO>> GetProduct(Guid id)
         {
-            var product = await _productContext.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
             
             if (product == null)
                 return NotFound();
@@ -46,8 +46,8 @@ namespace WarehouseManagementApi.Controllers
                 StockQuantity = productDTO.QuantityInStock
             };
 
-            _productContext.Add(product);
-            await _productContext.SaveChangesAsync();
+            _context.Add(product);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(CreateProduct), new { id = product.Id }, product);
         }
 
@@ -57,14 +57,14 @@ namespace WarehouseManagementApi.Controllers
             if (id != updatedProduct.Id)
                 return BadRequest();
 
-            var product = await _productContext.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null)
                 return NotFound();
 
-            _productContext.Entry(product).CurrentValues.SetValues(updatedProduct);
+            _context.Entry(product).CurrentValues.SetValues(updatedProduct);
             try
             {
-                await _productContext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             } catch (DbUpdateConcurrencyException) when (!ProductExists(id))
             {
                 return NotFound();
@@ -76,18 +76,18 @@ namespace WarehouseManagementApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
-            var product = await _productContext.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
             
             if (product == null)
                 return NotFound();
 
-            _productContext.Products.Remove(product);
-            await _productContext.SaveChangesAsync();
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         private bool ProductExists(Guid id) =>
-            _productContext.Products.Any(e => e.Id == id);
+            _context.Products.Any(e => e.Id == id);
 
         private static ProductDTO ProductToDTO(Product product) =>
             new()
