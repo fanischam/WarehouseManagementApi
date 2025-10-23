@@ -15,37 +15,43 @@ namespace WarehouseManagementApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Product[]>> Get()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get()
         {
-            var products = await _productContext.Products.ToArrayAsync();
-
-            if (products.Length == 0)
-                return NotFound();
-
-            return products;
+            return await _productContext.Products
+                .Select(product => ProductToDTO(product))
+                .ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(Guid id)
+        public async Task<ActionResult<ProductDTO>> GetProduct(Guid id)
         {
             var product = await _productContext.Products.FindAsync(id);
             
             if (product == null)
                 return NotFound();
             
-            return product;
+            return ProductToDTO(product);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> CreateProduct(Product product)
+        public async Task<ActionResult<ProductDTO>> CreateProduct(ProductDTO productDTO)
         {
+            var product = new Product
+            {
+                Id = Guid.NewGuid(),
+                Name = productDTO.Name,
+                Description = productDTO.Description,
+                Price = productDTO.Price,
+                StockQuantity = productDTO.QuantityInStock
+            };
+
             _productContext.Add(product);
             await _productContext.SaveChangesAsync();
             return CreatedAtAction(nameof(CreateProduct), new { id = product.Id }, product);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct (Guid id, Product updatedProduct)
+        public async Task<IActionResult> UpdateProduct (Guid id, ProductDTO updatedProduct)
         {
             if (id != updatedProduct.Id)
                 return BadRequest();
@@ -58,12 +64,9 @@ namespace WarehouseManagementApi.Controllers
             try
             {
                 await _productContext.SaveChangesAsync();
-            } catch (DbUpdateConcurrencyException)
+            } catch (DbUpdateConcurrencyException) when (!ProductExists(id))
             {
-                if (!_productContext.Products.Any(e => e.Id == id))
-                    return NotFound();
-                else
-                    throw;
+                return NotFound();
             }
 
             return NoContent();
@@ -81,5 +84,18 @@ namespace WarehouseManagementApi.Controllers
             await _productContext.SaveChangesAsync();
             return NoContent();
         }
+
+        private bool ProductExists(Guid id) =>
+            _productContext.Products.Any(e => e.Id == id);
+
+        private static ProductDTO ProductToDTO(Product product) =>
+            new()
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                QuantityInStock = product.StockQuantity
+            };
     }
 }
